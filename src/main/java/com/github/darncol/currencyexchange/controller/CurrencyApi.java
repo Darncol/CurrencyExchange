@@ -5,6 +5,7 @@ import com.github.darncol.currencyexchange.entity.Currency;
 import com.github.darncol.currencyexchange.entity.CurrencyDTO;
 import com.github.darncol.currencyexchange.service.CurrencyService;
 import com.google.gson.Gson;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/currencies")
-public class GetAllCurrencies extends HttpServlet {
+public class CurrencyApi extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -36,5 +37,35 @@ public class GetAllCurrencies extends HttpServlet {
 
         String json = gson.toJson(dtos);
         response.getWriter().write(json);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String code = req.getParameter("code");
+        String fullname = req.getParameter("name");
+        String sign = req.getParameter("sign");
+
+        if (code == null || fullname == null || sign == null) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        try {
+            CurrencyDAOImpl dao = new CurrencyDAOImpl();
+
+            if (dao.isCurrencyExists(code)) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            Currency currency = new Currency(0,code, fullname, sign);
+            dao.addCurrency(currency);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 }

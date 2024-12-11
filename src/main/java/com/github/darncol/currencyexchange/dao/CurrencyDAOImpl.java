@@ -77,4 +77,8 @@ public class CurrencyDAOImpl implements CurrencyDAO {
             e.printStackTrace();
         }
     }
+
+    public boolean isCurrencyExists(String code) {
+        return getCurrencyByCode(code) != null;
+    }
 }
