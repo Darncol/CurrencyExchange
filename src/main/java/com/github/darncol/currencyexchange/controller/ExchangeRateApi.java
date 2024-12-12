@@ -70,4 +70,42 @@ public class ExchangeRateApi extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_CONFLICT);
         }
     }
+
+    @Override
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String rate = req.getParameter("rate");
+        String baseCurrencyCode = req.getPathInfo().substring(1, 4);
+        String targetCurrencyCode = req.getPathInfo().substring(4);
+
+        BigDecimal rateBigDecimal;
+
+        ExchangeRateDAO exchangeRateDAO = new ExchangeRateDAOImpl();
+        CurrencyDAO currencyDAO = new CurrencyDAOImpl();
+
+        if (rate == null || !currencyDAO.isCurrencyExists(baseCurrencyCode) || !currencyDAO.isCurrencyExists(targetCurrencyCode)) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        try {
+            rateBigDecimal = BigDecimal.valueOf(Double.parseDouble(rate));
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        try {
+            Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
+            Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
+
+            exchangeRateDAO.
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
 }

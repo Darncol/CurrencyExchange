@@ -9,4 +9,5 @@ public interface ExchangeRateDAO {
     List<ExchangeRate> getExchangeRates();
     ExchangeRate getExchangeRate(Currency from, Currency to);
     void saveExchangeRate(ExchangeRate exchangeRate);
+    void updateExchangeRate(ExchangeRate exchangeRate);
 }

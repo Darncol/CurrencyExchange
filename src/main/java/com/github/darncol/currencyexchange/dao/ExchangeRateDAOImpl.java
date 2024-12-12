@@ -127,4 +127,18 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void updateExchangeRate(ExchangeRate exchangeRate) {
+        final String query = "UPDATE ExchangeRates SET rate = ? WHERE basecurrencyid = ? AND targetcurrencyid = ?";
+
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement preparedStatement = connection.prepareStatement(query);) {
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
