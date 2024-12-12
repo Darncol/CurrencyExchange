@@ -1,13 +1,14 @@
 package com.github.darncol.currencyexchange.dao;
 
 import com.github.darncol.currencyexchange.entity.Currency;
+import com.github.darncol.currencyexchange.utils.DataBaseURL;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CurrencyDAOImpl implements CurrencyDAO {
-    private final String url = "jdbc:sqlite:/Users/alexeysolop/Documents/Java/CurrencyExchange/identifier.sqlite";
+    private final String url = DataBaseURL.sqlitURL();
 
     @Override
     public List<Currency> getAllCurrencies() {
