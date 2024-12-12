@@ -8,4 +8,5 @@ public interface CurrencyDAO {
     List<Currency> getAllCurrencies();
     Currency getCurrencyByCode(String code);
     void addCurrency(Currency currency);
+    boolean isCurrencyExists(String code);
 }

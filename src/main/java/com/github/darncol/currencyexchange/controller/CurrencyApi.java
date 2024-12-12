@@ -1,5 +1,6 @@
 package com.github.darncol.currencyexchange.controller;
 
+import com.github.darncol.currencyexchange.dao.CurrencyDAO;
 import com.github.darncol.currencyexchange.dao.CurrencyDAOImpl;
 import com.github.darncol.currencyexchange.entity.Currency;
 import com.github.darncol.currencyexchange.entity.CurrencyDTO;
@@ -51,7 +52,7 @@ public class CurrencyApi extends HttpServlet {
         }
 
         try {
-            CurrencyDAOImpl dao = new CurrencyDAOImpl();
+            CurrencyDAO dao = new CurrencyDAOImpl();
 
             if (dao.isCurrencyExists(code)) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
