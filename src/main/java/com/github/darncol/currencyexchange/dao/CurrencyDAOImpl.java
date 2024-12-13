@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CurrencyDAOImpl implements CurrencyDAO {
-    private final String url = DataBaseURL.sqlitURL();
+    private final String url = DataBaseURL.sqliteURL();
 
     @Override
     public List<Currency> getAllCurrencies() {

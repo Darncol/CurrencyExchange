@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExchangeRateDAOImpl implements ExchangeRateDAO {
-    private final String url = DataBaseURL.sqlitURL();
+    private final String url = DataBaseURL.sqliteURL();
 
 
     @Override
