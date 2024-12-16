@@ -1,9 +1,9 @@
 package com.github.darncol.currencyexchange.controller;
 
 import com.github.darncol.currencyexchange.dao.CurrencyDAO;
-import com.github.darncol.currencyexchange.dao.CurrencyDAOImpl;
+import com.github.darncol.currencyexchange.dao.CurrencySQLite;
 import com.github.darncol.currencyexchange.dao.ExchangeRateDAO;
-import com.github.darncol.currencyexchange.dao.ExchangeRateDAOImpl;
+import com.github.darncol.currencyexchange.dao.ExchangeRateSQLite;
 import com.github.darncol.currencyexchange.entity.Currency;
 import com.github.darncol.currencyexchange.entity.ExchangeRate;
 import com.google.gson.Gson;
@@ -24,13 +24,7 @@ public class ExchangeRateApi extends HttpServlet {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            throw new IOException("JDBC Driver not found", e);
-        }
-
-        ExchangeRateDAOImpl dao = new ExchangeRateDAOImpl();
+        ExchangeRateSQLite dao = new ExchangeRateSQLite();
         Gson gson = new Gson();
 
         List<ExchangeRate> exchangeRates = dao.getExchangeRates();
@@ -51,8 +45,8 @@ public class ExchangeRateApi extends HttpServlet {
         }
 
         try {
-            ExchangeRateDAO exchangeRateDAO = new ExchangeRateDAOImpl();
-            CurrencyDAO currencyDAO = new CurrencyDAOImpl();
+            ExchangeRateDAO exchangeRateDAO = new ExchangeRateSQLite();
+            CurrencyDAO currencyDAO = new CurrencySQLite();
 
             Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
             Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
@@ -73,39 +67,38 @@ public class ExchangeRateApi extends HttpServlet {
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ExchangeRate exchangeRate;
+        BigDecimal rateBigDecimal;
         String rate = req.getParameter("rate");
         String baseCurrencyCode = req.getPathInfo().substring(1, 4);
         String targetCurrencyCode = req.getPathInfo().substring(4);
-
-        BigDecimal rateBigDecimal;
-
-        ExchangeRateDAO exchangeRateDAO = new ExchangeRateDAOImpl();
-        CurrencyDAO currencyDAO = new CurrencyDAOImpl();
-
-        if (rate == null || !currencyDAO.isCurrencyExists(baseCurrencyCode) || !currencyDAO.isCurrencyExists(targetCurrencyCode)) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        ExchangeRateDAO exchangeRateDAO = new ExchangeRateSQLite();
+        CurrencyDAO currencyDAO = new CurrencySQLite();
+        Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
+        Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
 
         try {
             rateBigDecimal = BigDecimal.valueOf(Double.parseDouble(rate));
-        } catch (Exception e) {
+        }catch (Exception e){
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
+            return;
+        }
+
+        if (baseCurrency == null || targetCurrency == null) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        try {
-            Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
-            Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
+        exchangeRate = exchangeRateDAO.getExchangeRate(baseCurrency, targetCurrency);
 
-            exchangeRateDAO.
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        if (exchangeRate == null) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
 
-
+        exchangeRate.setRate(rateBigDecimal);
+        exchangeRateDAO.updateExchangeRate(exchangeRate);
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }

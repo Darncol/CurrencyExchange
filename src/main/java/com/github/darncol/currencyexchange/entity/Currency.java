@@ -9,6 +9,7 @@ public class Currency {
     private String sign;
 
     public Currency(int id, String code, String fullName, String sign) {
+        validateCurrencyCode(code);
         this.id = id;
         this.code = code;
         this.fullName = fullName;
@@ -28,6 +29,7 @@ public class Currency {
     }
 
     public void setCode(String code) {
+        validateCurrencyCode(code);
         this.code = code;
     }
 
@@ -35,16 +37,14 @@ public class Currency {
         return fullName;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
     public String getSign() {
         return sign;
     }
 
-    public void setSign(String sign) {
-        this.sign = sign;
+    public void validateCurrencyCode(String code) {
+        if (code == null || code.length() != 3) {
+            throw new IllegalArgumentException("Currency code must be exactly 3 uppercase letters.");
+        }
     }
 
     @Override

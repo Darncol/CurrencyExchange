@@ -2,16 +2,14 @@ package com.github.darncol.currencyexchange.dao;
 
 import com.github.darncol.currencyexchange.entity.Currency;
 import com.github.darncol.currencyexchange.entity.ExchangeRate;
-import com.github.darncol.currencyexchange.utils.DataBaseURL;
+import com.github.darncol.currencyexchange.utils.DataBaseManager;
 import com.google.gson.Gson;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExchangeRateDAOImpl implements ExchangeRateDAO {
-    private final String url = DataBaseURL.sqliteURL();
-
+public class ExchangeRateSQLite implements ExchangeRateDAO {
 
     @Override
     public List<ExchangeRate> getExchangeRates() {
@@ -34,9 +32,11 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
                 """;
         Gson gson = new Gson();
 
-        try (Connection connection = DriverManager.getConnection(url);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query);) {
+        try (
+                Connection connection = DataBaseManager.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(query);
+        ) {
 
             while (resultSet.next()) {
                 Currency baseCurrency = new Currency(
@@ -75,8 +75,10 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
         String query = "SELECT * FROM exchangerates WHERE basecurrencyid = ? AND targetcurrencyid = ?";
         ExchangeRate exchangeRate = null;
 
-        try (Connection connection = DriverManager.getConnection(url);
-             PreparedStatement preparedStatement = connection.prepareStatement(query);) {
+        try (
+                Connection connection = DataBaseManager.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ) {
             preparedStatement.setInt(1, from.getId());
             preparedStatement.setInt(2, to.getId());
 
@@ -116,9 +118,10 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     public void saveExchangeRate(ExchangeRate exchangeRate) {
         String query = "INSERT INTO ExchangeRates (basecurrencyid, targetcurrencyid, rate) VALUES (?, ?, ?)";
 
-        try {
-            Connection connection = DriverManager.getConnection(url);
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+        try (
+                Connection connection = DataBaseManager.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ) {
             preparedStatement.setInt(1, exchangeRate.getBaseCurrency().getId());
             preparedStatement.setInt(2, exchangeRate.getTargetCurrency().getId());
             preparedStatement.setBigDecimal(3, exchangeRate.getRate());
@@ -132,10 +135,14 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     public void updateExchangeRate(ExchangeRate exchangeRate) {
         final String query = "UPDATE ExchangeRates SET rate = ? WHERE basecurrencyid = ? AND targetcurrencyid = ?";
 
-        try (Connection connection = DriverManager.getConnection(url);
-             PreparedStatement preparedStatement = connection.prepareStatement(query);) {
-
-
+        try (
+                Connection connection = DataBaseManager.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ) {
+            preparedStatement.setBigDecimal(1, exchangeRate.getRate());
+            preparedStatement.setInt(2, exchangeRate.getBaseCurrency().getId());
+            preparedStatement.setInt(3, exchangeRate.getTargetCurrency().getId());
+            preparedStatement.executeUpdate();
 
         } catch (Exception e) {
             e.printStackTrace();
