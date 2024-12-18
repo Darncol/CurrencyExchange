@@ -1,10 +1,16 @@
 package com.github.darncol.currencyexchange.entity;
 
 
+import com.google.gson.annotations.Expose;
+
 public class Currency {
+    @Expose
     private int id;
+    @Expose
     private String code;
+    @Expose
     private String fullName;
+    @Expose
     private String sign;
 
     public Currency(int id, String code, String fullName, String sign) {

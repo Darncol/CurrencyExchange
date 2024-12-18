@@ -1,11 +1,17 @@
 package com.github.darncol.currencyexchange.entity;
 
+import com.google.gson.annotations.Expose;
+
 import java.math.BigDecimal;
 
 public class ExchangeRate {
+    @Expose
     private int id;
+    @Expose
     private Currency baseCurrency;
+    @Expose
     private Currency targetCurrency;
+    @Expose
     private BigDecimal rate;
 
     public ExchangeRate(int id, Currency baseCurrency, Currency targetCurrency, BigDecimal rate) {
@@ -45,7 +51,9 @@ public class ExchangeRate {
     }
 
     public void setRate(BigDecimal rate) {
-        this.rate = rate;
+        if (rate != null && rate.compareTo(BigDecimal.ZERO) > 0) {
+            this.rate = rate;
+        }
     }
 
     @Override
