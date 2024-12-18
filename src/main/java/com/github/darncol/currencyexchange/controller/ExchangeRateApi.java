@@ -6,6 +6,7 @@ import com.github.darncol.currencyexchange.dao.ExchangeRateDAO;
 import com.github.darncol.currencyexchange.dao.ExchangeRateSQLite;
 import com.github.darncol.currencyexchange.entity.Currency;
 import com.github.darncol.currencyexchange.entity.ExchangeRate;
+import com.github.darncol.currencyexchange.service.ExchangeRateService;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,17 +18,17 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
-@WebServlet("/exchangeRates")
+@WebServlet({"/exchangeRates", "/exchangeRate/*"})
 public class ExchangeRateApi extends HttpServlet {
+    private final ExchangeRateService exchangeRateService = new ExchangeRateService(new ExchangeRateSQLite(), new CurrencySQLite());
+    private final Gson gson = new Gson();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        ExchangeRateSQLite dao = new ExchangeRateSQLite();
-        Gson gson = new Gson();
-
-        List<ExchangeRate> exchangeRates = dao.getExchangeRates();
+        List<ExchangeRate> exchangeRates = exchangeRateService.getExchangeRates();
         String json = gson.toJson(exchangeRates);
         resp.getWriter().write(json);
     }
@@ -36,69 +37,45 @@ public class ExchangeRateApi extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String baseCurrencyCode = req.getParameter("baseCurrencyCode");
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
-        String rateStr = req.getParameter("rate");
-        BigDecimal rate = BigDecimal.valueOf(Double.parseDouble(rateStr));
-
-        if (baseCurrencyCode == null || targetCurrencyCode == null || rate == null) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        String rate = req.getParameter("rate");
 
         try {
-            ExchangeRateDAO exchangeRateDAO = new ExchangeRateSQLite();
-            CurrencyDAO currencyDAO = new CurrencySQLite();
-
-            Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
-            Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
-
-            ExchangeRate exchangeRate = new ExchangeRate(
-                    0,
-                    baseCurrency,
-                    targetCurrency,
-                    rate
-            );
-
-            exchangeRateDAO.saveExchangeRate(exchangeRate);
+            exchangeRateService.addExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
+            resp.getWriter().write("{\"message\":\"" + "Added" + "\"}");
             resp.setStatus(HttpServletResponse.SC_CREATED);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
             resp.setStatus(HttpServletResponse.SC_CONFLICT);
+        } catch (IllegalArgumentException e) {
+            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ExchangeRate exchangeRate;
-        BigDecimal rateBigDecimal;
-        String rate = req.getParameter("rate");
+        StringBuilder sb = new StringBuilder();
+        try (var reader = req.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        }
+
+        String rate = sb.toString().substring(5);
+
         String baseCurrencyCode = req.getPathInfo().substring(1, 4);
         String targetCurrencyCode = req.getPathInfo().substring(4);
-        ExchangeRateDAO exchangeRateDAO = new ExchangeRateSQLite();
-        CurrencyDAO currencyDAO = new CurrencySQLite();
-        Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
-        Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
 
         try {
-            rateBigDecimal = BigDecimal.valueOf(Double.parseDouble(rate));
-        }catch (Exception e){
+            exchangeRateService.updateExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } catch (IllegalArgumentException e) {
+            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            e.printStackTrace();
-            return;
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
         }
-
-        if (baseCurrency == null || targetCurrency == null) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        exchangeRate = exchangeRateDAO.getExchangeRate(baseCurrency, targetCurrency);
-
-        if (exchangeRate == null) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        exchangeRate.setRate(rateBigDecimal);
-        exchangeRateDAO.updateExchangeRate(exchangeRate);
-        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }

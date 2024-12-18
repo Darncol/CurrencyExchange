@@ -30,7 +30,6 @@ public class ExchangeRateSQLite implements ExchangeRateDAO {
                 JOIN currencies bc ON bc.id = ex.basecurrencyid
                 JOIN currencies tc ON tc.id = ex.targetcurrencyid
                 """;
-        Gson gson = new Gson();
 
         try (
                 Connection connection = DataBaseManager.getConnection();
@@ -72,7 +71,23 @@ public class ExchangeRateSQLite implements ExchangeRateDAO {
 
     @Override
     public ExchangeRate getExchangeRate(Currency from, Currency to) {
-        String query = "SELECT * FROM exchangerates WHERE basecurrencyid = ? AND targetcurrencyid = ?";
+        final String query = """
+                SELECT  
+                    ex.id,
+                    ex.rate,
+                    bc.id AS basecurrencyid,
+                    bc.code AS basecurrencycode,
+                    bc.fullname AS basecurrencyfullname,
+                    bc.sign AS basecurrencysign,
+                    tc.id AS targetcurrencyid,
+                    tc.code AS targetcurrencycode,
+                    tc.fullname AS targetcurrencyfullname,
+                    tc.sign AS targetcurrencysign
+                FROM exchangerates ex
+                JOIN currencies bc ON bc.id = ex.basecurrencyid
+                JOIN currencies tc ON tc.id = ex.targetcurrencyid
+                WHERE ex.basecurrencyid = ? AND ex.targetcurrencyid = ?;
+                """;
         ExchangeRate exchangeRate = null;
 
         try (

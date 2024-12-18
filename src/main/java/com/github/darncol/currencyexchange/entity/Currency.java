@@ -1,6 +1,5 @@
 package com.github.darncol.currencyexchange.entity;
 
-import com.google.gson.annotations.SerializedName;
 
 public class Currency {
     private int id;
