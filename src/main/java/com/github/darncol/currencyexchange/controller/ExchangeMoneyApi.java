@@ -33,8 +33,7 @@ public class ExchangeMoneyApi extends HttpServlet {
         String amount = req.getParameter("amount");
 
         try {
-            ExchangeRate exchangeRate = exchangeService.getExchangeRate(from, to);
-            ExchangeMoney exchangeMoney = exchangeService.exchangeMoney(exchangeRate, amount);
+            ExchangeMoney exchangeMoney = exchangeService.exchangeMoney(from, to, amount);
             String json = gson.toJson(exchangeMoney);
             resp.getWriter().write(json);
             resp.setStatus(HttpServletResponse.SC_OK);
