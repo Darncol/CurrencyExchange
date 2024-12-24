@@ -6,6 +6,7 @@ import com.github.darncol.currencyexchange.entity.ExchangeMoney;
 import com.github.darncol.currencyexchange.entity.ExchangeRate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class ExchangeService extends ExchangeRateService {
 
@@ -15,6 +16,10 @@ public class ExchangeService extends ExchangeRateService {
 
     public ExchangeMoney exchangeMoney(String from, String to, String amount) {
         BigDecimal amountBigDecimal = new BigDecimal(amount);
+
+        if(amountBigDecimal  == null) {
+            throw new IllegalArgumentException("Please provide a valid amount");
+        }
 
         ExchangeRate exchangeRate = getExchangeRate(from, to);
 
@@ -33,10 +38,13 @@ public class ExchangeService extends ExchangeRateService {
         ExchangeRate reversedExchangeRate = getExchangeRate(to, from);
 
         if (reversedExchangeRate == null) {
-            throw new IllegalArgumentException("Cannot get reverse exchange rate from " + from + " to " + to);
+            throw new IllegalArgumentException("Cannot get exchange rate from " + from + " to " + to);
         }
-        BigDecimal rate = reversedExchangeRate.getRate().divide(new BigDecimal(100));
-        reversedExchangeRate.setRate(rate);
+
+        BigDecimal reversedRate = BigDecimal.ONE.divide(
+                reversedExchangeRate.getRate(), 6, RoundingMode.HALF_UP
+        );
+        reversedExchangeRate.setRate(reversedRate);
 
         return reversedExchangeRate;
     }

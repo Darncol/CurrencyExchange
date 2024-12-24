@@ -45,7 +45,7 @@ public class CurrencyService {
 
     private void validateCurrencyExists(String code) {
         if (currencyDAO.getCurrencyByCode(code) != null) {
-            throw new IllegalArgumentException("Currency with code " + code + " does not exist.");
+            throw new IllegalArgumentException("Currency with code " + code + " already exist.");
         }
     }
 }

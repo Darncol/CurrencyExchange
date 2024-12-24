@@ -31,6 +31,7 @@ public class ExchangeRateService {
     public void addExchangeRate(String baseCurrencyCode, String targetCurrencyCode, String rate) {
         Currency baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
         Currency targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
+
         BigDecimal rateBigDecimal = new BigDecimal(rate);
 
         if (baseCurrency == null || targetCurrency == null) {
