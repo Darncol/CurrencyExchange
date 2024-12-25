@@ -4,6 +4,7 @@ import com.github.darncol.currencyexchange.dao.CurrencyDAO;
 import com.github.darncol.currencyexchange.dao.CurrencySQLite;
 import com.github.darncol.currencyexchange.dao.ExchangeRateDAO;
 import com.github.darncol.currencyexchange.dao.ExchangeRateSQLite;
+import com.github.darncol.currencyexchange.dto.ErrorDTO;
 import com.github.darncol.currencyexchange.entity.Currency;
 import com.github.darncol.currencyexchange.entity.ExchangeRate;
 import com.github.darncol.currencyexchange.service.ExchangeRateService;
@@ -28,9 +29,14 @@ public class ExchangeRateApi extends HttpServlet {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        List<ExchangeRate> exchangeRates = exchangeRateService.getExchangeRates();
-        String json = gson.toJson(exchangeRates);
-        resp.getWriter().write(json);
+        try {
+            List<ExchangeRate> exchangeRates = exchangeRateService.getExchangeRates();
+            String json = gson.toJson(exchangeRates);
+            resp.getWriter().write(json);
+        } catch (IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
+        }
     }
 
     @Override
@@ -44,10 +50,10 @@ public class ExchangeRateApi extends HttpServlet {
             resp.getWriter().write("{\"message\":\"" + "Added" + "\"}");
             resp.setStatus(HttpServletResponse.SC_CREATED);
         } catch (NumberFormatException e) {
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
             resp.setStatus(HttpServletResponse.SC_CONFLICT);
         } catch (IllegalArgumentException e) {
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
@@ -71,11 +77,11 @@ public class ExchangeRateApi extends HttpServlet {
             exchangeRateService.updateExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
             resp.setStatus(HttpServletResponse.SC_OK);
         } catch (IllegalArgumentException e) {
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
         }
     }
 }

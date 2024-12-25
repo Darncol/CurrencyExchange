@@ -1,9 +1,8 @@
 package com.github.darncol.currencyexchange.controller;
 
-import com.github.darncol.currencyexchange.dao.CurrencyDAO;
 import com.github.darncol.currencyexchange.dao.CurrencySQLite;
-import com.github.darncol.currencyexchange.entity.Currency;
-import com.github.darncol.currencyexchange.entity.CurrencyDTO;
+import com.github.darncol.currencyexchange.dto.CurrencyDTO;
+import com.github.darncol.currencyexchange.dto.ErrorDTO;
 import com.github.darncol.currencyexchange.service.CurrencyService;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
@@ -13,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet("/currencies")
@@ -27,9 +25,14 @@ public class CurrencyApi extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        List<CurrencyDTO> dtos = currencyService.getCurrenciesDTO();
-        String json = gson.toJson(dtos);
-        response.getWriter().write(json);
+        try {
+            List<CurrencyDTO> dtos = currencyService.getCurrenciesDTO();
+            String json = gson.toJson(dtos);
+            response.getWriter().write(json);
+        } catch (IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(ErrorDTO.message(e.getMessage()));
+        }
     }
 
     @Override
@@ -42,10 +45,10 @@ public class CurrencyApi extends HttpServlet {
             currencyService.addNewCurrency(code, fullname, sign);
         } catch (IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"message\":\"Server error\"}");
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
         }
     }
 }

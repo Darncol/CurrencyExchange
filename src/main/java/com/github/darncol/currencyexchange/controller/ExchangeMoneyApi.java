@@ -2,6 +2,7 @@ package com.github.darncol.currencyexchange.controller;
 
 import com.github.darncol.currencyexchange.dao.CurrencySQLite;
 import com.github.darncol.currencyexchange.dao.ExchangeRateSQLite;
+import com.github.darncol.currencyexchange.dto.ErrorDTO;
 import com.github.darncol.currencyexchange.entity.ExchangeMoney;
 import com.github.darncol.currencyexchange.entity.ExchangeRate;
 import com.github.darncol.currencyexchange.service.ExchangeService;
@@ -38,15 +39,13 @@ public class ExchangeMoneyApi extends HttpServlet {
             resp.getWriter().write(json);
             resp.setStatus(HttpServletResponse.SC_OK);
 
-        } catch (NumberFormatException e) {
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
-            resp.setStatus(HttpServletResponse.SC_CONFLICT);
         } catch (IllegalArgumentException e) {
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
+            System.out.println(ErrorDTO.message(e.getMessage()));
         } catch (Exception e) {
-            resp.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write(ErrorDTO.message(e.getMessage()));
         }
     }
 }

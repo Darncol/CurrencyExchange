@@ -63,7 +63,7 @@ public class ExchangeRateSQLite implements ExchangeRateDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("can't get currencies from database");
         }
 
         return exchangeRatesList;
@@ -123,7 +123,7 @@ public class ExchangeRateSQLite implements ExchangeRateDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("can't get Exchange rate from database");
         }
 
         return exchangeRate;
@@ -142,7 +142,7 @@ public class ExchangeRateSQLite implements ExchangeRateDAO {
             preparedStatement.setBigDecimal(3, exchangeRate.getRate());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("can't save exchange rate to database");
         }
     }
 
@@ -160,7 +160,7 @@ public class ExchangeRateSQLite implements ExchangeRateDAO {
             preparedStatement.executeUpdate();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("can't update exchange rate to database");
         }
     }
 }

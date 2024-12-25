@@ -30,7 +30,7 @@ public class CurrencySQLite implements CurrencyDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Error getting currencies from database");
         }
 
         return currencies;
@@ -60,7 +60,7 @@ public class CurrencySQLite implements CurrencyDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("no such currency");
         }
 
         return currency;
@@ -80,7 +80,7 @@ public class CurrencySQLite implements CurrencyDAO {
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Error inserting currency");
         }
     }
 }

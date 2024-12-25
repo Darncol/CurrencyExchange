@@ -2,7 +2,7 @@ package com.github.darncol.currencyexchange.service;
 
 import com.github.darncol.currencyexchange.dao.CurrencyDAO;
 import com.github.darncol.currencyexchange.entity.Currency;
-import com.github.darncol.currencyexchange.entity.CurrencyDTO;
+import com.github.darncol.currencyexchange.dto.CurrencyDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,5 +1,6 @@
 $(document).ready(function() {
-    const host = "http://217.146.67.24:8080/CurrencyExchange_war/"
+    // const host = "http://217.146.67.24:8080/CurrencyExchange_war/"
+    const host = "http://localhost:8080/CurrencyExchange_war_exploded/"
 
     // Fetch the list of currencies and populate the select element
     function requestCurrencies() {
