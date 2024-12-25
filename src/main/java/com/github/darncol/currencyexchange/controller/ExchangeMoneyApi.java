@@ -42,7 +42,6 @@ public class ExchangeMoneyApi extends HttpServlet {
         } catch (IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(ErrorDTO.message(e.getMessage()));
-            System.out.println(ErrorDTO.message(e.getMessage()));
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write(ErrorDTO.message(e.getMessage()));

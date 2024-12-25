@@ -34,10 +34,6 @@ public class ExchangeService extends ExchangeRateService {
             exchangeRate = getFromUSDExchangeRate(from, to);
         }
 
-        if (exchangeRate == null) {
-            throw new IllegalArgumentException("No exchange rate found for " + from + " to " + to);
-        }
-
         return new ExchangeMoney(exchangeRate, amountBigDecimal);
     }
 
@@ -45,7 +41,7 @@ public class ExchangeService extends ExchangeRateService {
         ExchangeRate reversedExchangeRate = getExchangeRate(to, from);
 
         if (reversedExchangeRate == null) {
-            throw new IllegalArgumentException("Cannot get exchange rate from " + from + " to " + to);
+            return null;
         }
 
         BigDecimal reversedRate = BigDecimal.ONE.divide(
@@ -61,6 +57,14 @@ public class ExchangeService extends ExchangeRateService {
 
         ExchangeRate baseCurrencyToUSD = getExchangeRate(from, usd);
         ExchangeRate uSDToTargetCurrency = getExchangeRate(usd, to);
+
+        if(baseCurrencyToUSD == null) {
+            baseCurrencyToUSD = getReversedExchangeRate(usd, from);
+        }
+
+        if(uSDToTargetCurrency == null) {
+            uSDToTargetCurrency = getReversedExchangeRate(to, usd);
+        }
 
         if (baseCurrencyToUSD == null || uSDToTargetCurrency == null) {
             throw new IllegalArgumentException("Cannot get exchange rate from " + from + " to " + to);
